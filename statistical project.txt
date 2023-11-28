@@ -1,0 +1,49 @@
+HousingPrice$FireplaceQu <- NULL # this varible was not working with the code
+#importing the data, an overview 
+HousingPrice <- read.csv("train.csv")
+dim(HousingPrice)
+summary(HousingPrice)
+View(HousingPrice)
+
+#excluding columns with more than 80 percent missing values so it would improve the accuracy of our model based on remaining features
+missing <- is.na(HousingPrice)
+colSums(missing)
+missing_pct <- colMeans(is.na(HousingPrice)) * 100
+threshold_pct <- 80
+cols_to_remove <- names(missing_pct[missing_pct > threshold_pct])
+HousingPrice <- HousingPrice[, !(names(HousingPrice) %in% cols_to_remove)]
+dim(HousingPrice)
+
+# 4 features removed  Alley, PoolQC, Fence, MiscFeature
+
+
+#filling the NA in numerical values with 
+for (col in names(df)) {
+  
+  # check if the column is numeric
+  if (is.numeric(df[[col]])) {
+    
+    # calculate the mean of the column
+    col_mean <- mean(df[[col]], na.rm = TRUE)
+    
+    # replace null values with the column mean
+    df[[col]][is.na(df[[col]])] <- col_mean
+    
+  }
+  
+}
+
+
+#filling the NA in categorical 
+non_num_cols <- sapply(HousingPrice, is.factor) | sapply(HousingPrice, is.character)
+non_num_cols
+
+get_mode <- function(x) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
+
+for (col in names(HousingPrice[, non_num_cols])) {
+  mode_value <- as.character(get_mode(HousingPrice[, col]))
+  HousingPrice[is.na(HousingPrice[, col]), col] <- mode_value
+}
